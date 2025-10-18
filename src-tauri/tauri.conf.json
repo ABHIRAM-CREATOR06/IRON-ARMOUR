@@ -1,0 +1,14 @@
+{
+  "productName": "Iron Armour",
+  "version": "0.1.0",
+  "identifier": "com.ironarmour.dev",
+  "build": {
+    "beforeBuildCommand": "",
+    "beforeDevCommand": "",
+    "frontendDist": "../src"
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all"
+  }
+}

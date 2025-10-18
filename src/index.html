@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iron Armour - Secure Password Vault</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .accounts-list {
+            margin-top: 20px;
+        }
+
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #e1e5e9;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .account-item button {
+            padding: 5px 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .account-item button:hover {
+            background: #218838;
+        }
+
+        .message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .password-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Iron Armour</h1>
+            <p>Secure Password Vault</p>
+        </div>
+
+        <div id="master-password-section">
+            <div class="form-group">
+                <label for="master-password">Master Password</label>
+                <input type="password" id="master-password" placeholder="Enter your master password">
+            </div>
+            <button class="btn" id="set-master-btn">Set Master Password</button>
+        </div>
+
+        <div id="main-content" style="display: none;">
+            <div class="tabs">
+                <button class="tab active" data-tab="add">Add Password</button>
+                <button class="tab" data-tab="view">View Passwords</button>
+                <button class="tab" data-tab="otp">Generate OTP</button>
+                <button class="tab" data-tab="wifi">Wi-Fi Analysis</button>
+            </div>
+
+            <div id="add-tab" class="tab-content active">
+                <div class="form-group">
+                    <label for="account-name">Account Name</label>
+                    <input type="text" id="account-name" placeholder="e.g., Gmail, GitHub">
+                </div>
+                <div class="form-group">
+                    <label for="account-password">Password</label>
+                    <input type="password" id="account-password" placeholder="Enter password or type 'otp'">
+                </div>
+                <button class="btn" id="add-password-btn">Add Password</button>
+            </div>
+
+            <div id="view-tab" class="tab-content">
+                <button class="btn" id="list-accounts-btn">List Accounts</button>
+                <div id="accounts-list" class="accounts-list"></div>
+            </div>
+
+            <div id="otp-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="otp-account">Account Name</label>
+                    <input type="text" id="otp-account" placeholder="e.g., Gmail">
+                </div>
+                <div class="form-group">
+                    <label for="otp-username">Username</label>
+                    <input type="text" id="otp-username" placeholder="Your username">
+                </div>
+                <div class="form-group">
+                    <label for="otp-secret">OTP Secret</label>
+                    <input type="password" id="otp-secret" placeholder="Secret key">
+                </div>
+                <div class="form-group">
+                    <label for="otp-length">Password Length</label>
+                    <input type="number" id="otp-length" value="16" min="8" max="32">
+                </div>
+                <button class="btn" id="generate-otp-btn">Generate OTP Password</button>
+                <div id="otp-result" class="password-display" style="display: none;"></div>
+            </div>
+
+            <div id="wifi-tab" class="tab-content">
+                <button class="btn" id="analyze-wifi-btn">Analyze Wi-Fi Passwords</button>
+                <div id="wifi-results"></div>
+            </div>
+        </div>
+
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <script>
+        const { invoke } = window.__TAURI__.tauri;
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // Set master password
+        document.getElementById('set-master-btn').addEventListener('click', async () => {
+            const password = document.getElementById('master-password').value;
+            if (!password) {
+                showMessage('Please enter a master password', 'error');
+                return;
+            }
+
+            try {
+                await invoke('set_master_password', { password });
+                document.getElementById('master-password-section').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                showMessage('Master password set successfully!', 'success');
+            } catch (error) {
+                showMessage('Error setting master password: ' + error, 'error');
+            }
+        });
+
+        // Add password
+        document.getElementById('add-password-btn').addEventListener('click', async () => {
+            const account = document.getElementById('account-name').value;
+            const password = document.getElementById('account-password').value;
+
+            if (!account || !password) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                await invoke('add_password', { account, password });
+                showMessage('Password added successfully!', 'success');
+                document.getElementById('account-name').value = '';
+                document.getElementById('account-password').value = '';
+            } catch (error) {
+                showMessage('Error adding password: ' + error, 'error');
+            }
+        });
+
+        // List accounts
+        document.getElementById('list-accounts-btn').addEventListener('click', async () => {
+            try {
+                const accounts = await invoke('list_accounts');
+                const accountsList = document.getElementById('accounts-list');
+                accountsList.innerHTML = '';
+
+                accounts.forEach(account => {
+                    const accountDiv = document.createElement('div');
+                    accountDiv.className = 'account-item';
+                    accountDiv.innerHTML = `
+                        <span>${account}</span>
+                        <button onclick="viewPassword('${account}')">View</button>
+                    `;
+                    accountsList.appendChild(accountDiv);
+                });
+            } catch (error) {
+                showMessage('Error listing accounts: ' + error, 'error');
+            }
+        });
+
+        // View password
+        async function viewPassword(account) {
+            try {
+                const password = await invoke('get_password', { account });
+                showMessage(`Password for ${account}: ${password}`, 'success');
+            } catch (error) {
+                showMessage('Error retrieving password: ' + error, 'error');
+            }
+        }
+
+        // Generate OTP
+        document.getElementById('generate-otp-btn').addEventListener('click', async () => {
+            const account = document.getElementById('otp-account').value;
+            const username = document.getElementById('otp-username').value;
+            const secret = document.getElementById('otp-secret').value;
+            const length = parseInt(document.getElementById('otp-length').value);
+
+            if (!account || !username || !secret) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                const otpPassword = await invoke('generate_otp', { account, username, secret, length });
+                const resultDiv = document.getElementById('otp-result');
+                resultDiv.textContent = otpPassword;
+                resultDiv.style.display = 'block';
+                showMessage('OTP password generated successfully!', 'success');
+            } catch (error) {
+                showMessage('Error generating OTP: ' + error, 'error');
+            }
+        });
+
+        // Analyze Wi-Fi
+        document.getElementById('analyze-wifi-btn').addEventListener('click', async () => {
+            try {
+                const wifiPasswords = await invoke('analyze_wifi');
+                const resultsDiv = document.getElementById('wifi-results');
+                resultsDiv.innerHTML = '<h3>Wi-Fi Password Analysis:</h3>';
+
+                wifiPasswords.forEach(([ssid, password, strength]) => {
+                    const item = document.createElement('div');
+                    item.className = 'account-item';
+                    item.innerHTML = `<strong>${ssid}</strong>: ${password} <span style="color: ${strength === 'Strong' ? 'green' : 'red'}">(${strength})</span>`;
+                    resultsDiv.appendChild(item);
+                });
+            } catch (error) {
+                showMessage('Error analyzing Wi-Fi passwords: ' + error, 'error');
+            }
+        });
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronArmour", "IronArmour\IronArmour.csproj", "{28340325-4692-7952-0C11-06E9487C276C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{28340325-4692-7952-0C11-06E9487C276C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28340325-4692-7952-0C11-06E9487C276C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28340325-4692-7952-0C11-06E9487C276C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28340325-4692-7952-0C11-06E9487C276C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {675128AD-5BB4-4FBF-9784-02D903ED0A8D}
+	EndGlobalSection
+EndGlobal

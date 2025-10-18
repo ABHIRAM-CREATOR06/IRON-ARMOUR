@@ -3,9 +3,27 @@ name = "iron-armour"
 version = "0.1.0"
 edition = "2021"
 
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
 [dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "1", features = ["shell-open"] }
 aes-gcm = "0.10"
 base64 = "0.21"
 pbkdf2 = "0.11"
 hmac = "0.12"
 sha2 = "0.10"
+argon2 = "0.5"
+rand = "0.8"
+
+[features]
+# this feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT remove this
+custom-protocol = ["tauri/custom-protocol"]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tauri = { version = "1.0", features = ["shell-open"] }
+
+

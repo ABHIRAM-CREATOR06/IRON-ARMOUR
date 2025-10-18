@@ -1,0 +1,166 @@
+<Window x:Class="IronArmour.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:IronArmour"
+        mc:Ignorable="d"
+        Title="🔐 Iron Armour - Login" Height="500" Width="400"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        MinWidth="400" MinHeight="500" MaxWidth="600" MaxHeight="700">
+    <Window.Resources>
+        <Storyboard x:Key="FadeInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5"/>
+        </Storyboard>
+        <Storyboard x:Key="SlideInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="50" To="0" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+        <Style x:Key="LoginButtonStyle" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#FF0000" Offset="0"/>
+                        <GradientStop Color="#CC0000" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="#FF0000"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF3333"/>
+                                <Setter Property="BorderBrush" Value="#FF3333"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#990000"/>
+                                <Setter Property="BorderBrush" Value="#990000"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="Transparent" CornerRadius="15" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="#667eea" Opacity="0.3"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#000000" Offset="0"/>
+                    <GradientStop Color="#1a1a1a" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+
+            <!-- Animated Background Elements -->
+            <Canvas>
+                <Ellipse x:Name="Circle1" Width="100" Height="100" Fill="#FF0000" Opacity="0.1" Canvas.Left="-50" Canvas.Top="-50">
+                    <Ellipse.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)" From="-50" To="350" Duration="0:0:8" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)" From="-50" To="450" Duration="0:0:6" AutoReverse="True"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+                <Ellipse x:Name="Circle2" Width="80" Height="80" Fill="#FF0000" Opacity="0.1" Canvas.Left="300" Canvas.Top="400">
+                    <Ellipse.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Left)" From="300" To="-30" Duration="0:0:10" AutoReverse="True"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="(Canvas.Top)" From="400" To="-30" Duration="0:0:7" AutoReverse="True"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+            </Canvas>
+
+            <StackPanel VerticalAlignment="Center" Margin="40">
+                <StackPanel.RenderTransform>
+                    <TranslateTransform/>
+                </StackPanel.RenderTransform>
+                <StackPanel.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard Storyboard="{StaticResource SlideInAnimation}"/>
+                    </EventTrigger>
+                </StackPanel.Triggers>
+
+                <!-- Header -->
+                <TextBlock Text="🔐" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <TextBlock Text="Iron Armour" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FF0000" Margin="0,0,0,5"/>
+                <TextBlock Text="Secure Password Vault" FontSize="14" HorizontalAlignment="Center" Foreground="#FFFFFF" Margin="0,0,0,40"/>
+
+                <!-- Login Form -->
+                <Border Background="White" CornerRadius="10" Padding="30" x:Name="LoginForm">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#000000" Opacity="0.1"/>
+                    </Border.Effect>
+
+                    <StackPanel>
+                        <TextBlock Text="Username:" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#FFFFFF" FontSize="14"/>
+                        <TextBox x:Name="UsernameBox" Margin="0,0,0,20" Padding="12" BorderBrush="#FF0000" BorderThickness="2" FontSize="14" Background="#1a1a1a" Foreground="#FFFFFF" ToolTip="Enter your username to login"/>
+
+                        <TextBlock Text="Password:" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#FFFFFF" FontSize="14"/>
+                        <PasswordBox x:Name="PasswordBox" Margin="0,0,0,30" Padding="12" BorderBrush="#FF0000" BorderThickness="2" FontSize="14" Background="#1a1a1a" Foreground="#FFFFFF" ToolTip="Enter your password to login"/>
+
+                        <Button Content="Login" Style="{StaticResource LoginButtonStyle}" Click="LoginButton_Click" Margin="0,0,0,15"/>
+                        <Button Content="Create New Account" Background="Transparent" Foreground="#FF0000" BorderThickness="0" FontWeight="SemiBold" Click="CreateAccountButton_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Create Account Form (Hidden by default) -->
+                <Border Background="White" CornerRadius="10" Padding="30" x:Name="CreateAccountForm" Visibility="Collapsed" Margin="0,20,0,0">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#000000" Opacity="0.1"/>
+                    </Border.Effect>
+
+                    <StackPanel>
+                        <TextBlock Text="Create New Account" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20" Foreground="#FF0000"/>
+                        <TextBlock Text="Username:" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#FFFFFF" FontSize="14"/>
+                        <TextBox x:Name="NewUsernameBox" Margin="0,0,0,15" Padding="12" BorderBrush="#FF0000" BorderThickness="2" FontSize="14" Background="#1a1a1a" Foreground="#FFFFFF" ToolTip="Choose a unique username for your account"/>
+
+                        <TextBlock Text="Password:" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#FFFFFF" FontSize="14"/>
+                        <PasswordBox x:Name="NewPasswordBox" Margin="0,0,0,15" Padding="12" BorderBrush="#FF0000" BorderThickness="2" FontSize="14" Background="#1a1a1a" Foreground="#FFFFFF" ToolTip="Create a strong password (minimum 6 characters)"/>
+
+                        <TextBlock Text="Confirm Password:" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#FFFFFF" FontSize="14"/>
+                        <PasswordBox x:Name="ConfirmPasswordBox" Margin="0,0,0,30" Padding="12" BorderBrush="#FF0000" BorderThickness="2" FontSize="14" Background="#1a1a1a" Foreground="#FFFFFF" ToolTip="Re-enter your password to confirm"/>
+
+                        <Button Content="Create Account" Style="{StaticResource LoginButtonStyle}" Click="CreateAccountSubmit_Click" Margin="0,0,0,15"/>
+                        <Button Content="Back to Login" Background="Transparent" Foreground="#FF0000" BorderThickness="0" FontWeight="SemiBold" Click="BackToLoginButton_Click"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Status Message -->
+                <TextBlock x:Name="StatusTextBlock" HorizontalAlignment="Center" Margin="0,20,0,0" FontWeight="SemiBold" Visibility="Collapsed"/>
+            </StackPanel>
+
+            <!-- Close Button -->
+            <Button Content="✕" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" Background="Transparent" Foreground="White" BorderThickness="0" FontSize="16" Click="CloseButton_Click"/>
+        </Grid>
+    </Border>
+
+</Window>
