@@ -7,6 +7,10 @@ namespace IronArmour
     {
         private readonly VaultContext _context;
         private string? _masterKey;
+        private User? _currentUser;
+
+        public VaultContext Context => _context;
+        public User? CurrentUser => _currentUser;
 
         public VaultService()
         {

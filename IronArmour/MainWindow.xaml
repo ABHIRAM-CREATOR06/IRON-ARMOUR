@@ -105,15 +105,20 @@
                         <TextBlock Text="Account Name:" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#FFFFFF" FontSize="14"/>
                         <TextBox x:Name="AccountNameBox" Margin="0,0,0,15" Padding="10" BorderBrush="#FF0000" BorderThickness="2" Background="#1a1a1a" Foreground="#FFFFFF" ToolTip="Enter the name of the account (e.g., Gmail, GitHub)"/>
                         <TextBlock Text="Password:" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#FFFFFF" FontSize="14"/>
-                        <PasswordBox x:Name="PasswordBox" Margin="0,0,0,20" Padding="10" BorderBrush="#FF0000" BorderThickness="2" Background="#1a1a1a" Foreground="#FFFFFF" ToolTip="Enter the password to store securely"/>
+                        <PasswordBox x:Name="PasswordBox" Margin="0,0,0,10" Padding="10" BorderBrush="#FF0000" BorderThickness="2" Background="#1a1a1a" Foreground="#FFFFFF" ToolTip="Enter the password to store securely"/>
+                        <TextBlock x:Name="PasswordStrengthIndicator" Margin="0,0,0,10" FontSize="12" Visibility="Collapsed"/>
                         <Button Content="Add Password" Style="{StaticResource ModernButton}" Click="AddPassword_Click"/>
                     </StackPanel>
                 </TabItem>
 
                 <TabItem Header="View Passwords">
                     <StackPanel Margin="20">
-                        <Button Content="List Accounts" Style="{StaticResource ModernButton}" Margin="0,0,0,20" Click="ListAccounts_Click"/>
-                        <ListBox x:Name="AccountsListBox" Height="300" BorderBrush="#FF0000" BorderThickness="2" Background="#1a1a1a" Foreground="#FFFFFF">
+                        <Button Content="List Accounts" Style="{StaticResource ModernButton}" Margin="0,0,0,10" Click="ListAccounts_Click"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Button Content="Password Strength Report (PDF)" Style="{StaticResource ModernButton}" Margin="0,0,10,0" Click="ExportPasswordStrengthPdfReport_Click"/>
+                            <Button Content="Password Strength Report (CSV)" Style="{StaticResource ModernButton}" Click="ExportPasswordStrengthCsvReport_Click"/>
+                        </StackPanel>
+                        <ListBox x:Name="AccountsListBox" Height="250" BorderBrush="#FF0000" BorderThickness="2" Background="#1a1a1a" Foreground="#FFFFFF">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -143,8 +148,12 @@
 
                 <TabItem Header="Wi-Fi Analysis">
                     <StackPanel Margin="20">
-                        <Button Content="Analyze Wi-Fi Passwords" Style="{StaticResource ModernButton}" Margin="0,0,0,20" Click="AnalyzeWifi_Click"/>
-                        <ListBox x:Name="WifiListBox" Height="300" BorderBrush="#FF0000" BorderThickness="2" Background="#1a1a1a" Foreground="#FFFFFF">
+                        <Button Content="Analyze Wi-Fi Passwords" Style="{StaticResource ModernButton}" Margin="0,0,0,10" Click="AnalyzeWifi_Click"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Button Content="Export PDF Report" Style="{StaticResource ModernButton}" Margin="0,0,10,0" Click="ExportWifiPdfReport_Click"/>
+                            <Button Content="Export CSV Report" Style="{StaticResource ModernButton}" Click="ExportWifiCsvReport_Click"/>
+                        </StackPanel>
+                        <ListBox x:Name="WifiListBox" Height="250" BorderBrush="#FF0000" BorderThickness="2" Background="#1a1a1a" Foreground="#FFFFFF">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel>
@@ -156,6 +165,91 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                     </StackPanel>
+                </TabItem>
+
+                <TabItem Header="Settings">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="20">
+                            <!-- Sync Settings -->
+                            <Border Background="#2a2a2a" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="5" ShadowDepth="0" Color="#FF0000" Opacity="0.3"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <TextBlock Text="🔄 Server Synchronization" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="#FF0000"/>
+                                    <CheckBox x:Name="EnableSyncCheckBox" Content="Enable server synchronization" Margin="0,0,0,15" Foreground="#FFFFFF"/>
+
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Server URL:" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#FFFFFF"/>
+                                        <TextBox x:Name="ServerUrlBox" Grid.Column="1" Padding="8" BorderBrush="#FF0000" BorderThickness="1" Background="#1a1a1a" Foreground="#FFFFFF" Text="https://api.ironarmour.com"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Auth Token:" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#FFFFFF"/>
+                                        <PasswordBox x:Name="AuthTokenBox" Grid.Column="1" Padding="8" BorderBrush="#FF0000" BorderThickness="1" Background="#1a1a1a" Foreground="#FFFFFF"/>
+                                    </Grid>
+
+                                    <Grid Margin="0,0,0,15">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Sync Mode:" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#FFFFFF"/>
+                                        <ComboBox x:Name="SyncDirectionCombo" Grid.Column="1" Background="#1a1a1a" Foreground="#FFFFFF" BorderBrush="#FF0000" BorderThickness="1">
+                                            <ComboBoxItem Content="Disabled"/>
+                                            <ComboBoxItem Content="One-way (Local → Server)"/>
+                                            <ComboBoxItem Content="One-way (Server → Local)"/>
+                                            <ComboBoxItem Content="Two-way sync"/>
+                                            <ComboBoxItem Content="Manual sync only"/>
+                                        </ComboBox>
+                                    </Grid>
+
+                                    <CheckBox x:Name="AutoSyncCheckBox" Content="Enable automatic sync" Margin="0,0,0,15" Foreground="#FFFFFF"/>
+
+                                    <Grid Margin="0,0,0,20">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Sync Interval (min):" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#FFFFFF"/>
+                                        <TextBox x:Name="SyncIntervalBox" Grid.Column="1" Text="60" Padding="8" BorderBrush="#FF0000" BorderThickness="1" Background="#1a1a1a" Foreground="#FFFFFF"/>
+                                    </Grid>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                        <Button Content="🔗 Test Connection" Background="#FF6B35" Foreground="White" BorderThickness="0" Padding="12,8" FontWeight="SemiBold" Margin="0,0,10,0" Click="TestConnection_Click"/>
+                                        <Button Content="🔄 Sync Now" Background="#4CAF50" Foreground="White" BorderThickness="0" Padding="12,8" FontWeight="SemiBold" Click="SyncNow_Click"/>
+                                    </StackPanel>
+
+                                    <Border Background="#1a1a1a" CornerRadius="5" Padding="10">
+                                        <TextBlock x:Name="SyncStatusText" Text="🔄 Sync Status: Ready" FontWeight="SemiBold" Foreground="#00FF00"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Excluded Accounts -->
+                            <Border Background="#2a2a2a" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="5" ShadowDepth="0" Color="#FF0000" Opacity="0.3"/>
+                                </Border.Effect>
+                                <StackPanel>
+                                    <TextBlock Text="🚫 Excluded Accounts" FontSize="16" FontWeight="Bold" Margin="0,0,0,15" Foreground="#FF0000"/>
+                                    <TextBlock Text="Accounts to exclude from sync (comma-separated):" Margin="0,0,0,10" Foreground="#FFFFFF"/>
+                                    <TextBox x:Name="ExcludedAccountsBox" Height="60" AcceptsReturn="True" Padding="10" BorderBrush="#FF0000" BorderThickness="1" Background="#1a1a1a" Foreground="#FFFFFF" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Save Settings -->
+                            <Button Content="💾 Save Settings" Background="#2196F3" Foreground="White" BorderThickness="0" Padding="15,10" FontWeight="SemiBold" HorizontalAlignment="Left" Click="SaveSettings_Click"/>
+                        </StackPanel>
+                    </ScrollViewer>
                 </TabItem>
             </TabControl>
         </Border>

@@ -20,6 +20,8 @@ namespace IronArmour;
 public partial class MainWindow : Window, INotifyPropertyChanged
 {
     private VaultService? _vaultService;
+    private SyncManager? _syncManager;
+    private SyncSettings _syncSettings;
     private Visibility _masterPasswordVisibility = Visibility.Visible;
     private Visibility _mainContentVisibility = Visibility.Collapsed;
     private Visibility _statusVisibility = Visibility.Collapsed;
@@ -65,6 +67,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         DataContext = this;
         _vaultService = new VaultService();
 
+        // Load sync settings
+        LoadSyncSettings();
+
+        // Add password strength monitoring
+        PasswordBox.PasswordChanged += PasswordBox_PasswordChanged;
+
         // Always show master password setup first - no auto-verification
         MasterPasswordVisibility = Visibility.Visible;
         MainContentVisibility = Visibility.Collapsed;
@@ -94,11 +102,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        if (password.Length < 6)
-        {
-            ShowStatus("Master password must be at least 6 characters long", Brushes.Red);
-            return;
-        }
+        // Remove demo restriction - allow any password
 
         if (_vaultService.SetMasterPassword(password))
         {
@@ -199,6 +203,130 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         WifiListBox.ItemsSource = WifiEntries;
     }
 
+    private void ExportWifiPdfReport_Click(object sender, RoutedEventArgs e)
+    {
+        var wifiData = _vaultService.AnalyzeWifi();
+        if (wifiData.Count == 0)
+        {
+            ShowStatus("No Wi-Fi data to export", Brushes.Orange);
+            return;
+        }
+
+        var saveDialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "PDF Files (*.pdf)|*.pdf",
+            DefaultExt = "pdf",
+            FileName = $"WiFi_Report_{DateTime.Now:yyyyMMdd_HHmmss}"
+        };
+
+        if (saveDialog.ShowDialog() == true)
+        {
+            try
+            {
+                ReportGenerator.GenerateWifiReportPdf(wifiData, saveDialog.FileName);
+                ShowStatus("Wi-Fi PDF report exported successfully!", Brushes.Green);
+                ReportGenerator.OpenFile(saveDialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                ShowStatus($"Failed to export PDF: {ex.Message}", Brushes.Red);
+            }
+        }
+    }
+
+    private void ExportWifiCsvReport_Click(object sender, RoutedEventArgs e)
+    {
+        var wifiData = _vaultService.AnalyzeWifi();
+        if (wifiData.Count == 0)
+        {
+            ShowStatus("No Wi-Fi data to export", Brushes.Orange);
+            return;
+        }
+
+        var saveDialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV Files (*.csv)|*.csv",
+            DefaultExt = "csv",
+            FileName = $"WiFi_Report_{DateTime.Now:yyyyMMdd_HHmmss}"
+        };
+
+        if (saveDialog.ShowDialog() == true)
+        {
+            try
+            {
+                ReportGenerator.GenerateWifiReportCsv(wifiData, saveDialog.FileName);
+                ShowStatus("Wi-Fi CSV report exported successfully!", Brushes.Green);
+                ReportGenerator.OpenFile(saveDialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                ShowStatus($"Failed to export CSV: {ex.Message}", Brushes.Red);
+            }
+        }
+    }
+
+    private void ExportPasswordStrengthPdfReport_Click(object sender, RoutedEventArgs e)
+    {
+        var accounts = _vaultService.ListAccounts();
+        if (accounts.Count == 0)
+        {
+            ShowStatus("No password data to export", Brushes.Orange);
+            return;
+        }
+
+        var saveDialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "PDF Files (*.pdf)|*.pdf",
+            DefaultExt = "pdf",
+            FileName = $"Password_Strength_Report_{DateTime.Now:yyyyMMdd_HHmmss}"
+        };
+
+        if (saveDialog.ShowDialog() == true)
+        {
+            try
+            {
+                ReportGenerator.GeneratePasswordStrengthReportPdf(accounts, _vaultService, saveDialog.FileName);
+                ShowStatus("Password strength PDF report exported successfully!", Brushes.Green);
+                ReportGenerator.OpenFile(saveDialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                ShowStatus($"Failed to export PDF: {ex.Message}", Brushes.Red);
+            }
+        }
+    }
+
+    private void ExportPasswordStrengthCsvReport_Click(object sender, RoutedEventArgs e)
+    {
+        var accounts = _vaultService.ListAccounts();
+        if (accounts.Count == 0)
+        {
+            ShowStatus("No password data to export", Brushes.Orange);
+            return;
+        }
+
+        var saveDialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "CSV Files (*.csv)|*.csv",
+            DefaultExt = "csv",
+            FileName = $"Password_Strength_Report_{DateTime.Now:yyyyMMdd_HHmmss}"
+        };
+
+        if (saveDialog.ShowDialog() == true)
+        {
+            try
+            {
+                ReportGenerator.GeneratePasswordStrengthReportCsv(accounts, _vaultService, saveDialog.FileName);
+                ShowStatus("Password strength CSV report exported successfully!", Brushes.Green);
+                ReportGenerator.OpenFile(saveDialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                ShowStatus($"Failed to export CSV: {ex.Message}", Brushes.Red);
+            }
+        }
+    }
+
     private void ShowStatus(string message, Brush color)
     {
         StatusMessage = message;
@@ -246,6 +374,214 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 GenerateOtp_Click(null, null);
             }
         }
+    }
+
+    private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        var password = PasswordBox.Password;
+        if (string.IsNullOrEmpty(password))
+        {
+            PasswordStrengthIndicator.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var strength = EvaluatePasswordStrength(password);
+        PasswordStrengthIndicator.Visibility = Visibility.Visible;
+
+        var (text, color) = strength switch
+        {
+            "Strong" => ("Strong Password ✓", "#00FF00"),
+            "Medium" => ("Medium Password ⚠", "#FFA500"),
+            "Weak" => ("Weak Password ✗", "#FF0000"),
+            _ => ("Unknown", "#FFFFFF")
+        };
+
+        PasswordStrengthIndicator.Text = text;
+        PasswordStrengthIndicator.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(color);
+    }
+
+    private string EvaluatePasswordStrength(string password)
+    {
+        if (string.IsNullOrEmpty(password)) return "Weak";
+
+        var score = 0;
+        if (password.Length >= 8) score++;
+        if (password.Length >= 12) score++;
+        if (password.Any(char.IsUpper)) score++;
+        if (password.Any(char.IsLower)) score++;
+        if (password.Any(char.IsDigit)) score++;
+        if (password.Any(ch => !char.IsLetterOrDigit(ch))) score++;
+
+        return score >= 5 ? "Strong" : score >= 3 ? "Medium" : "Weak";
+    }
+
+    private void LoadSyncSettings()
+    {
+        using var context = new VaultContext();
+        context.Database.EnsureCreated(); // Ensure database is created with new tables
+
+        var settings = context.SyncSettings.FirstOrDefault();
+        if (settings != null)
+        {
+            // Handle migration for new fields
+            if (string.IsNullOrEmpty(settings.DatabaseType))
+            {
+                settings.DatabaseType = "HTTP";
+                settings.MySqlConnectionString = "";
+                context.SaveChanges();
+            }
+            _syncSettings = settings;
+        }
+        else
+        {
+            _syncSettings = new SyncSettings();
+            context.SyncSettings.Add(_syncSettings);
+            context.SaveChanges();
+        }
+
+        // Update UI with loaded settings
+        Dispatcher.Invoke(() =>
+        {
+            EnableSyncCheckBox.IsChecked = _syncSettings.IsSyncEnabled;
+            ServerUrlBox.Text = _syncSettings.ServerUrl;
+            AuthTokenBox.Password = _syncSettings.AuthToken;
+            SyncDirectionCombo.SelectedIndex = (int)_syncSettings.SyncDirection;
+            AutoSyncCheckBox.IsChecked = _syncSettings.AutoSyncEnabled;
+            SyncIntervalBox.Text = _syncSettings.SyncIntervalMinutes.ToString();
+            ExcludedAccountsBox.Text = string.Join(", ", _syncSettings.ExcludedAccounts);
+            UpdateSyncStatus();
+        });
+    }
+
+    private void SaveSettings_Click(object sender, RoutedEventArgs e)
+    {
+        _syncSettings.IsSyncEnabled = EnableSyncCheckBox.IsChecked ?? false;
+        _syncSettings.ServerUrl = ServerUrlBox.Text;
+        _syncSettings.AuthToken = AuthTokenBox.Password;
+        _syncSettings.SyncDirection = (SyncDirection)SyncDirectionCombo.SelectedIndex;
+        _syncSettings.AutoSyncEnabled = AutoSyncCheckBox.IsChecked ?? false;
+
+        if (int.TryParse(SyncIntervalBox.Text, out var interval))
+        {
+            _syncSettings.SyncIntervalMinutes = interval;
+        }
+
+        _syncSettings.ExcludedAccounts = ExcludedAccountsBox.Text
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        using var context = new VaultContext();
+        var existing = context.SyncSettings.FirstOrDefault();
+        if (existing == null)
+        {
+            context.SyncSettings.Add(_syncSettings);
+        }
+        else
+        {
+            existing.IsSyncEnabled = _syncSettings.IsSyncEnabled;
+            existing.ServerUrl = _syncSettings.ServerUrl;
+            existing.AuthToken = _syncSettings.AuthToken;
+            existing.SyncDirection = _syncSettings.SyncDirection;
+            existing.AutoSyncEnabled = _syncSettings.AutoSyncEnabled;
+            existing.SyncIntervalMinutes = _syncSettings.SyncIntervalMinutes;
+            existing.ExcludedAccounts = _syncSettings.ExcludedAccounts;
+        }
+        context.SaveChanges();
+
+        // Reinitialize sync manager with new settings
+        InitializeSyncManager();
+
+        ShowStatus("Settings saved successfully!", Brushes.Green);
+    }
+
+    private void InitializeSyncManager()
+    {
+        if (_vaultService?.CurrentUser == null) return;
+
+        ISyncProvider syncProvider;
+        if (_syncSettings.DatabaseType == "MySQL")
+        {
+            syncProvider = new MySqlSyncProvider(_syncSettings.ServerUrl, _syncSettings.AuthToken);
+        }
+        else
+        {
+            syncProvider = new HttpSyncProvider(_syncSettings.ServerUrl, _syncSettings.AuthToken);
+        }
+
+        _syncManager = new SyncManager(_vaultService.Context, syncProvider, _syncSettings, _vaultService.CurrentUser);
+    }
+
+    private async void TestConnection_Click(object sender, RoutedEventArgs e)
+    {
+        if (_syncManager == null)
+        {
+            InitializeSyncManager();
+        }
+
+        if (_syncManager == null)
+        {
+            ShowStatus("Unable to initialize sync manager", Brushes.Red);
+            return;
+        }
+
+        var success = await _syncManager.TestConnectionAsync();
+        UpdateSyncStatus();
+
+        if (success)
+        {
+            ShowStatus("Connection test successful!", Brushes.Green);
+        }
+        else
+        {
+            ShowStatus("Connection test failed. Check server URL and network.", Brushes.Red);
+        }
+    }
+
+    private async void SyncNow_Click(object sender, RoutedEventArgs e)
+    {
+        if (_syncManager == null)
+        {
+            InitializeSyncManager();
+        }
+
+        if (_syncManager == null)
+        {
+            ShowStatus("Unable to initialize sync manager", Brushes.Red);
+            return;
+        }
+
+        var response = await _syncManager.PerformSyncAsync();
+        UpdateSyncStatus();
+
+        if (response.Success)
+        {
+            ShowStatus($"Sync completed successfully! Processed {response.ServerPasswords.Count} items.", Brushes.Green);
+        }
+        else
+        {
+            ShowStatus($"Sync failed: {response.Message}", Brushes.Red);
+        }
+    }
+
+    private void UpdateSyncStatus()
+    {
+        if (_syncManager?.Status == null) return;
+
+        var status = _syncManager.Status;
+        var statusColor = status.CurrentState switch
+        {
+            SyncState.Success => "#00FF00",
+            SyncState.Error => "#FF0000",
+            SyncState.Conflict => "#FFA500",
+            SyncState.Syncing => "#FFFF00",
+            _ => "#FFFFFF"
+        };
+
+        Dispatcher.Invoke(() =>
+        {
+            SyncStatusText.Text = $"Sync Status: {status.StatusMessage}";
+            SyncStatusText.Foreground = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFromString(statusColor);
+        });
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

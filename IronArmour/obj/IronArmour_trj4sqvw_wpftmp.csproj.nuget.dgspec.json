@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\IronArmour.csproj": {}
+    "C:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\IronArmour.csproj": {}
   },
   "projects": {
-    "c:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\IronArmour.csproj": {
+    "C:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\IronArmour.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\IronArmour.csproj",
+        "projectUniqueName": "C:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\IronArmour.csproj",
         "projectName": "IronArmour",
-        "projectPath": "c:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\IronArmour.csproj",
+        "projectPath": "C:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\IronArmour.csproj",
         "packagesPath": "C:\\Users\\abhir\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\obj\\",
+        "outputPath": "C:\\Users\\abhir\\OneDrive\\Documents\\GitHub\\IRON-ARMOUR\\IronArmour\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\abhir\\AppData\\Roaming\\NuGet\\NuGet.Config"
