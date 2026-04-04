@@ -388,4 +388,4 @@ Response:
 
 ---
 
-**Built with ❤️ using C# and WPF - Enterprise-Grade Password Management** 🛡️⚡🔐
+**Built with ❤️ using C# and WPF - Enterprise-Grade Password Management** 🛡️⚡
